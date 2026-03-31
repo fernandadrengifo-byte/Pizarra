@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pizarra tipo Paint</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial;
+      background: #f4f4f4;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(5, 50px);
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .menu button {
+      width: 50px;
+      height: 50px;
+      border: 1px solid #999;
+      background: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .menu button:hover {
+      background: lightblue;
+    }
+
+    .activo {
+      background: lightgreen !important;
+    }
+
+    canvas {
+      border: 2px solid black;
+      background: white;
+    }
+
+    button.borrar {
+      margin-top: 10px;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h3>Pizarra tipo Paint 🎨</h3>
+
+<div class="menu">
+  <button onclick="seleccionar('libre', this)" class="activo">✏️</button>
+  <button onclick="seleccionar('linea', this)">／</button>
+  <button onclick="seleccionar('rectangulo', this)">⬛</button>
+  <button onclick="seleccionar('circulo', this)">⚪</button>
+  <button onclick="seleccionar('triangulo', this)">🔺</button>
+</div>
+
+<canvas id="lienzo" width="500" height="350"></canvas>
+<br>
+<button class="borrar" onclick="borrar()">Borrar</button>
+
+<script>
+  var canvas = document.getElementById("lienzo");
+  var ctx = canvas.getContext("2d");
+
+  var figura = "libre";
+  var dibujando = false;
+  var xInicial, yInicial;
+
+  function seleccionar(f, boton) {
+    figura = f;
+
+    var botones = document.querySelectorAll(".menu button");
+    botones.forEach(b => b.classList.remove("activo"));
+
+    boton.classList.add("activo");
+  }
+
+  canvas.onmousedown = function(e) {
+    dibujando = true;
+    xInicial = e.offsetX;
+    yInicial = e.offsetY;
+  }
+
+  canvas.onmouseup = function(e) {
+    dibujando = false;
+
+    var x = e.offsetX;
+    var y = e.offsetY;
+
+    // Línea
+    if (figura == "linea") {
+      ctx.beginPath();
+      ctx.moveTo(xInicial, yInicial);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+
+    // Rectángulo ✅
+    if (figura == "rectangulo") {
+      ctx.strokeRect(xInicial, yInicial, x - xInicial, y - yInicial);
+    }
+
+    // Círculo
+    if (figura == "circulo") {
+      var r = Math.sqrt((x - xInicial)*(x - xInicial) + (y - yInicial)*(y - yInicial));
+      ctx.beginPath();
+      ctx.arc(xInicial, yInicial, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Triángulo
+    if (figura == "triangulo") {
+      ctx.beginPath();
+      ctx.moveTo(xInicial, yInicial);
+      ctx.lineTo(x, y);
+      ctx.lineTo(xInicial * 2 - x, y);
+      ctx.closePath();
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+  }
+
+  canvas.onmousemove = function(e) {
+    if (dibujando && figura == "libre") {
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+    }
+  }
+
+  function borrar() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+</script>
+
+</body>
+</html>
